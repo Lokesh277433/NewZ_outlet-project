@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}News Outlet{% endblock %} | News Outlet</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% include 'partials/masthead.html' %}
+    {% include 'partials/live_ticker.html' %}
+    {% include 'partials/nav.html' %}
+
+    {% include 'partials/messages.html' %}
+
+    <main class="site-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <div class="footer-brand">
+                <span class="wordmark">Naked</span>
+                <p>Independent journalism for India and the world.</p>
+            </div>
+            <nav class="footer-nav">
+                {% for cat in nav_categories|slice:":6" %}
+                <a href="{{ cat.get_absolute_url }}">{{ cat.name }}</a>
+                {% endfor %}
+            </nav>
+            <p class="footer-copy">&copy; {% now "Y" %} News Outlet. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block content %}
+<article class="article-page container">
+    <header class="article-header">
+        <a href="{{ article.category.get_absolute_url }}" class="kicker">{{ article.category.name }}</a>
+        {% if article.kicker %}<p class="standfirst">{{ article.kicker }}</p>{% endif %}
+        <h1 class="headline headline-article">{{ article.title }}</h1>
+        <div class="article-meta">
+            <div class="byline">
+                By <a href="{% url 'news:author' article.author.username %}">{{ article.author.get_full_name|default:article.author.username }}</a>
+                {% if article.published_at %}
+                <time datetime="{{ article.published_at|date:'c' }}">{{ article.published_at|date:"j F Y, H:i" }} IST</time>
+                {% endif %}
+            </div>
+            <div class="article-actions">
+                {% if user.is_authenticated %}
+                <button type="button" class="btn btn-outline bookmark-btn {% if is_bookmarked %}bookmarked{% endif %}"
+                        data-url="{% url 'news:toggle_bookmark' article.slug %}"
+                        data-csrf="{{ csrf_token }}">
+                    {% if is_bookmarked %}Saved{% else %}Save{% endif %}
+                </button>
+                {% endif %}
+                <button type="button" class="btn btn-ghost copy-link-btn" data-url="{{ request.build_absolute_uri }}">Copy link</button>
+            </div>
+        </div>
+    </header>
+
+    {% if article.hero_image %}
+    <figure class="article-hero">
+        <img src="{{ article.hero_image.url }}" alt="{{ article.title }}">
+    </figure>
+    {% endif %}
+
+    <div class="article-body">
+        {{ article.body|safe }}
+    </div>
+
+    <footer class="article-footer">
+        <span class="views-count">{{ article.views_count }} views</span>
+        <a href="{{ article.category.get_absolute_url }}" class="tag">{{ article.category.name }}</a>
+        {% for tag in article.tags.all %}
+        <span class="tag">{{ tag.name }}</span>
+        {% endfor %}
+    </footer>
+
+    {% if related %}
+    <section class="related-stories">
+        <h2 class="section-title">Related stories</h2>
+        <div class="card-grid card-grid-4">
+            {% for rel in related %}
+            {% include 'partials/article_card.html' with article=rel %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="comments-section" id="comments">
+        <h2 class="section-title">Comments ({{ comments|length }})</h2>
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'news:add_comment' article.slug %}" class="comment-form" id="comment-form">
+            {% csrf_token %}
+            {{ comment_form.body }}
+            <button type="submit" class="btn btn-primary">Post comment</button>
+        </form>
+        {% else %}
+        <p class="comment-login-prompt"><a href="{% url 'accounts:login' %}?next={{ request.path }}">Sign in</a> to join the discussion.</p>
+        {% endif %}
+
+        <ul class="comment-list" id="comment-list">
+            {% for comment in comments %}
+            <li class="comment">
+                <strong>{{ comment.user.get_full_name|default:comment.user.username }}</strong>
+                <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"j M Y, H:i" }}</time>
+                <p>{{ comment.body }}</p>
+            </li>
+            {% empty %}
+            <li class="comment comment-empty">No comments yet. Be the first.</li>
+            {% endfor %}
+        </ul>
+    </section>
+</article>
+{% endblock %}

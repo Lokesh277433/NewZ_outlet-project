@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign in{% endblock %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="auth-card">
+        <h1 class="page-title">Sign in</h1>
+        <p class="auth-subtitle">Use your email and password. Superusers, staff, and readers all sign in here — you’ll see the tools that match your role.</p>
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<span class="field-error">{{ field.errors.0 }}</span>{% endif %}
+            </div>
+            {% endfor %}
+            {% if form.non_field_errors %}
+            <p class="field-error">{{ form.non_field_errors.0 }}</p>
+            {% endif %}
+            <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+        </form>
+        <p class="auth-switch"><a href="{% url 'accounts:forgot_password' %}">Forgot password?</a></p>
+        <p class="auth-switch">New here? <a href="{% url 'accounts:register' %}">Create an account</a></p>
+    </div>
+</div>
+{% endblock %}

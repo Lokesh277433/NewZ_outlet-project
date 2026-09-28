@@ -1,0 +1,12 @@
+<article class="card card-wire">
+    {% if item.image %}
+    <a href="{{ item.detail_url }}" class="card-image">
+        <img src="{{ item.image }}" alt="{{ item.title }}" loading="lazy">
+    </a>
+    {% endif %}
+    <div class="card-body">
+        <span class="card-kicker">{{ item.source }} · Wire</span>
+        <h3 class="card-title"><a href="{{ item.detail_url }}">{{ item.title }}</a></h3>
+        {% if item.excerpt %}<p class="card-excerpt">{{ item.excerpt|truncatewords:22 }}</p>{% endif %}
+    </div>
+</article>

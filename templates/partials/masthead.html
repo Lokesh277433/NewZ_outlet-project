@@ -1,0 +1,25 @@
+<header class="masthead">
+    <div class="container masthead-inner">
+        <div class="masthead-meta">
+            <time datetime="{% now 'c' %}">{% now "l, j F Y" %}</time>
+            {% if site_weather %}
+            <span class="masthead-weather">{{ site_weather.city }} · {{ site_weather.temperature }}°C{% if site_weather.description %}, {{ site_weather.description|title }}{% endif %}</span>
+            {% endif %}
+        </div>
+        <a href="{% url 'news:home' %}" class="wordmark-link">
+            <h1 class="wordmark">News Outlet</h1>
+        </a>
+        <div class="masthead-auth">
+            {% if user.is_authenticated %}
+                <a href="{% url 'accounts:profile' %}" class="btn btn-ghost">{{ user.get_full_name|default:user.email }}</a>
+                <form method="post" action="{% url 'accounts:logout' %}" class="inline-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline">Sign out</button>
+                </form>
+            {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Sign in</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary">Register</a>
+            {% endif %}
+        </div>
+    </div>
+</header>

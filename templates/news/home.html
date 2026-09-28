@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if wire_stories %}
+    <section class="section-block latest-wire-block">
+        <div class="section-header">
+            <h2 class="section-title">Latest news from GNews</h2>
+            <span class="section-more">Live wire feed</span>
+        </div>
+        <div class="card-grid card-grid-4">
+            {% for item in wire_stories %}
+            {% include 'partials/wire_card.html' with item=item %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if lead %}
+    <section class="hero-grid">
+        <article class="lead-story">
+            {% if lead.hero_image %}
+            <a href="{{ lead.get_absolute_url }}" class="lead-image">
+                <img src="{{ lead.hero_image.url }}" alt="{{ lead.title }}">
+                {% if lead.is_breaking %}<span class="badge badge-breaking">Breaking</span>{% endif %}
+            </a>
+            {% endif %}
+            <div class="lead-body">
+                <a href="{{ lead.category.get_absolute_url }}" class="kicker">{{ lead.category.name }}</a>
+                {% if lead.kicker %}<p class="standfirst">{{ lead.kicker }}</p>{% endif %}
+                <h2 class="headline"><a href="{{ lead.get_absolute_url }}">{{ lead.title }}</a></h2>
+                <p class="excerpt">{{ lead.excerpt }}</p>
+                <div class="byline">
+                    <a href="{% url 'news:author' lead.author.username %}">{{ lead.author.get_full_name|default:lead.author.username }}</a>
+                    {% if lead.published_at %}<time datetime="{{ lead.published_at|date:'c' }}">{{ lead.published_at|timesince }} ago</time>{% endif %}
+                </div>
+            </div>
+        </article>
+        <div class="secondary-stack">
+            {% for article in secondary %}
+            {% include 'partials/article_card.html' with article=article %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if latest %}
+    <section class="section-block">
+        <h2 class="section-title">Latest from the newsroom</h2>
+        <div class="card-grid card-grid-3">
+            {% for article in latest %}
+            {% include 'partials/article_card.html' with article=article %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% for block in section_blocks %}
+    <section class="section-block">
+        <div class="section-header">
+            <h2 class="section-title"><a href="{{ block.category.get_absolute_url }}">{{ block.category.name }}</a></h2>
+            <a href="{{ block.category.get_absolute_url }}" class="section-more">View all &rarr;</a>
+        </div>
+        <div class="card-grid card-grid-4">
+            {% for article in block.articles %}
+            {% include 'partials/article_card.html' with article=article %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+</div>
+{% endblock %}

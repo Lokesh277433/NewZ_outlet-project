@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Search{% if query %}: {{ query }}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="page-header">
+        <h1 class="page-title">Search</h1>
+        <form action="{% url 'news:search' %}" method="get" class="search-page-form">
+            <input type="search" name="q" value="{{ query }}" placeholder="Search articles…" class="search-input search-input-lg">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </form>
+    </header>
+
+    {% if query %}
+    <p class="search-results-count">{{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for &ldquo;{{ query }}&rdquo;</p>
+    {% endif %}
+
+    <div class="card-grid card-grid-3">
+        {% for article in page_obj %}
+        {% include 'partials/article_card.html' with article=article %}
+        {% empty %}
+        {% if query %}
+        <p class="empty-state">No articles found matching your search.</p>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    {% include 'partials/pagination.html' %}
+</div>
+{% endblock %}

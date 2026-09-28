@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="page-title">Your profile</h1>
+    <div class="profile-grid">
+        <div>
+            <form method="post" enctype="multipart/form-data" class="profile-form auth-card">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="field-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endfor %}
+                <p class="field-help">Signed in as {{ user.email }}</p>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </form>
+
+            <form method="post" action="{% url 'accounts:change_password' %}" class="profile-form auth-card password-card" id="password-change-form">
+                {% csrf_token %}
+                <h2 class="section-title">Change password</h2>
+                <p class="auth-subtitle">Enter your current password, then choose a new one. This updates without leaving the page.</p>
+                <div id="password-change-status" class="alert" hidden></div>
+                {% for field in password_form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    <span class="field-error" data-field="{{ field.name }}"></span>
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-outline">Update password</button>
+            </form>
+        </div>
+        <div class="profile-sidebar">
+            <h2 class="section-title">Your roles</h2>
+            <ul class="role-list">
+                {% for role in user.role_names %}
+                <li class="role-badge">{{ role }}</li>
+                {% empty %}
+                <li>Reader</li>
+                {% endfor %}
+            </ul>
+            {% if user.is_superuser %}
+            <p class="field-help">You have the superuser newsroom: approvals, staff, pins, and auto-approve.</p>
+            {% elif user.is_staff %}
+            <p class="field-help">You can write articles. They go to a superuser unless auto-approve is on.</p>
+            {% else %}
+            <p class="field-help">You can read the latest news, comment, and save stories.</p>
+            {% endif %}
+            {% if bookmarks %}
+            <h2 class="section-title">Saved articles</h2>
+            <ul class="bookmark-list">
+                {% for bm in bookmarks %}
+                <li><a href="{{ bm.article.get_absolute_url }}">{{ bm.article.title }}</a></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

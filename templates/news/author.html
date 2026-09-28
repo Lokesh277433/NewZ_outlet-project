@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ author.get_full_name|default:author.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="author-header">
+        {% if author.avatar %}
+        <img src="{{ author.avatar.url }}" alt="{{ author.username }}" class="author-avatar">
+        {% else %}
+        <div class="author-avatar author-avatar-placeholder">{{ author.username|first|upper }}</div>
+        {% endif %}
+        <div>
+            <h1 class="page-title">{{ author.get_full_name|default:author.username }}</h1>
+            {% if author.bio %}<p class="author-bio">{{ author.bio }}</p>{% endif %}
+            <p class="author-meta">@{{ author.username }}</p>
+        </div>
+    </header>
+
+    <h2 class="section-title">Articles</h2>
+    <div class="card-grid card-grid-3">
+        {% for article in page_obj %}
+        {% include 'partials/article_card.html' with article=article %}
+        {% empty %}
+        <p class="empty-state">No published articles yet.</p>
+        {% endfor %}
+    </div>
+
+    {% include 'partials/pagination.html' %}
+</div>
+{% endblock %}

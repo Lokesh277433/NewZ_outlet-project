@@ -1,0 +1,19 @@
+{% if live_ticker_items %}
+<div class="live-ticker-bar" aria-label="Live headlines">
+    <div class="container live-ticker-inner">
+        <span class="live-ticker-label">Live</span>
+        <div class="live-ticker-track">
+            <div class="live-ticker-content">
+                {% for item in live_ticker_items %}
+                <a href="{{ item.detail_url }}" class="live-ticker-item">{{ item.title }}</a>
+                <span class="live-ticker-separator" aria-hidden="true">•</span>
+                {% endfor %}
+                {% for item in live_ticker_items %}
+                <a href="{{ item.detail_url }}" class="live-ticker-item" aria-hidden="true" tabindex="-1">{{ item.title }}</a>
+                <span class="live-ticker-separator" aria-hidden="true">•</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

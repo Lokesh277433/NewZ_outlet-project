@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_super %}Newsroom{% else %}My articles{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="page-header newsroom-header">
+        <div>
+            <h1 class="page-title">{% if is_super %}Superuser newsroom{% else %}My articles{% endif %}</h1>
+            {% if not is_super %}
+            <p class="page-desc">Everything you have submitted, with its current status.</p>
+            {% endif %}
+        </div>
+        <a href="{% url 'news:newsroom_create' %}" class="btn btn-primary">New article</a>
+    </header>
+
+    {% if is_super %}
+    <section class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.pending }}</span>
+            <span class="stat-label">Pending review</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.published_week }}</span>
+            <span class="stat-label">Published this week</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.active_staff }}</span>
+            <span class="stat-label">Active staff</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.drafts }}</span>
+            <span class="stat-label">Drafts</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ stats.rejected }}</span>
+            <span class="stat-label">Rejected</span>
+        </div>
+    </section>
+
+    <section class="newsroom-panel">
+        <div class="newsroom-panel-header">
+            <h2 class="section-title">Auto-approve</h2>
+            <form method="post" action="{% url 'news:newsroom_auto_approve' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn {% if editorial.auto_approve_staff %}btn-primary{% else %}btn-outline{% endif %}">
+                    {% if editorial.auto_approve_staff %}On — staff posts go live{% else %}Off — review required{% endif %}
+                </button>
+            </form>
+        </div>
+        <p class="field-help">When this is on, staff submissions publish immediately. You can also grant auto-approve to individual writers below.</p>
+    </section>
+
+    <section class="newsroom-panel">
+        <h2 class="section-title">Who can write</h2>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Staff writer</th>
+                        <th>Auto-approve</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in staff_users %}
+                    <tr>
+                        <td>{{ member.email }}</td>
+                        <td>{{ member.get_full_name|default:"—" }}</td>
+                        <td>
+                            <form method="post" action="{% url 'news:newsroom_toggle_staff' member.pk %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm {% if member.is_staff %}btn-primary{% else %}btn-outline{% endif %}">
+                                    {% if member.is_staff %}Staff{% else %}Make staff{% endif %}
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            {% if member.is_staff %}
+                            <form method="post" action="{% url 'news:newsroom_user_auto_approve' member.pk %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm {% if member.auto_approve %}btn-primary{% else %}btn-outline{% endif %}">
+                                    {% if member.auto_approve %}On{% else %}Off{% endif %}
+                                </button>
+                            </form>
+                            {% else %}
+                            —
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4">No other users yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% else %}
+    <nav class="status-filters">
+        <a href="{% url 'news:newsroom_dashboard' %}" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-ghost{% endif %}">All</a>
+        <a href="?status=draft" class="btn btn-sm {% if status_filter == 'draft' %}btn-primary{% else %}btn-ghost{% endif %}">Drafts ({{ status_counts.draft|default:0 }})</a>
+        <a href="?status=review" class="btn btn-sm {% if status_filter == 'review' %}btn-primary{% else %}btn-ghost{% endif %}">Pending ({{ status_counts.review|default:0 }})</a>
+        <a href="?status=published" class="btn btn-sm {% if status_filter == 'published' %}btn-primary{% else %}btn-ghost{% endif %}">Published ({{ status_counts.published|default:0 }})</a>
+        <a href="?status=rejected" class="btn btn-sm {% if status_filter == 'rejected' %}btn-primary{% else %}btn-ghost{% endif %}">Rejected ({{ status_counts.rejected|default:0 }})</a>
+    </nav>
+    {% endif %}
+
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Section</th>
+                    {% if is_super %}<th>Author</th>{% endif %}
+                    <th>Status</th>
+                    <th>Updated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                <tr>
+                    <td>
+                        <a href="{% url 'news:newsroom_edit' article.pk %}">{{ article.title }}</a>
+                        {% if article.is_featured %}<span class="pin-badge">Pinned</span>{% endif %}
+                    </td>
+                    <td>{{ article.category.name }}</td>
+                    {% if is_super %}<td>{{ article.author.email }}</td>{% endif %}
+                    <td><span class="status-badge status-{{ article.status }}">{{ article.get_status_display }}</span></td>
+                    <td>{{ article.updated_at|timesince }} ago</td>
+                    <td class="action-cell">
+                        <a href="{% url 'news:newsroom_edit' article.pk %}" class="btn btn-ghost btn-sm">Edit</a>
+                        {% if article.status == 'draft' or article.status == 'rejected' %}
+                            {% if article.author == user or is_super %}
+                            <form method="post" action="{% url 'news:newsroom_submit' article.pk %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline btn-sm">Submit</button>
+                            </form>
+                            {% endif %}
+                        {% endif %}
+                        {% if is_super and article.status == 'review' %}
+                        <form method="post" action="{% url 'news:newsroom_publish' article.pk %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-sm">Approve</button>
+                        </form>
+                        <form method="post" action="{% url 'news:newsroom_reject' article.pk %}" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="review_note" value="">
+                            <button type="submit" class="btn btn-outline btn-sm">Reject</button>
+                        </form>
+                        {% endif %}
+                        {% if is_super and article.status == 'published' %}
+                            {% if article.is_featured %}
+                            <form method="post" action="{% url 'news:newsroom_unpin' article.pk %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline btn-sm">Unpin hero</button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'news:newsroom_pin' article.pk %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline btn-sm">Pin to hero</button>
+                            </form>
+                            {% endif %}
+                        <form method="post" action="{% url 'news:newsroom_unpublish' article.pk %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline btn-sm">Unpublish</button>
+                        </form>
+                        {% endif %}
+                        {% if article.status == 'published' %}
+                        <a href="{{ article.get_absolute_url }}" class="btn btn-ghost btn-sm" target="_blank">View</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="empty-state">No articles yet. Create your first story.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

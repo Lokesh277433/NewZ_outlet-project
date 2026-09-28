@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ story.title }}{% endblock %}
+
+{% block content %}
+<article class="container article-page wire-preview">
+    <header class="article-header">
+        <p class="kicker">{{ story.source_name }} · GNews</p>
+        <h1 class="headline headline-article">{{ story.title }}</h1>
+        <div class="article-meta">
+            <span>{% if story.source_published_at %}Published {{ story.source_published_at }}{% else %}Latest wire report{% endif %}</span>
+        </div>
+    </header>
+
+    {% if story.image_url %}
+    <figure class="article-hero"><img src="{{ story.image_url }}" alt="{{ story.title }}"></figure>
+    {% endif %}
+
+    {% if story.excerpt %}
+    <div class="article-body"><p>{{ story.excerpt }}</p></div>
+    {% endif %}
+
+    <section class="wire-source-box">
+        <h2 class="section-title">Original reporting</h2>
+        <p>This preview is supplied by GNews. The complete report is published by {{ story.source_name }}.</p>
+        <a class="btn btn-primary" href="{{ story.source_url }}" target="_blank" rel="noopener noreferrer">Read original report</a>
+    </section>
+</article>
+{% endblock %}

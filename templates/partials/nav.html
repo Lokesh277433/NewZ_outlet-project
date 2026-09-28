@@ -1,0 +1,21 @@
+<nav class="site-nav" id="site-nav">
+    <div class="container nav-inner">
+        <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links" id="nav-links">
+            <li><a href="{% url 'news:home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a></li>
+            {% for cat in nav_categories %}
+            <li><a href="{{ cat.get_absolute_url }}" class="{% if request.resolver_match.kwargs.slug == cat.slug %}active{% endif %}">{{ cat.name }}</a></li>
+            {% endfor %}
+            {% if user.is_journalist %}
+            <li><a href="{% url 'news:newsroom_dashboard' %}" class="{% if request.resolver_match.url_name == 'newsroom_dashboard' or 'newsroom_' in request.resolver_match.url_name %}active{% endif %}">Newsroom</a></li>
+            {% endif %}
+        </ul>
+        <form action="{% url 'news:search' %}" method="get" class="nav-search" id="search-form">
+            <input type="search" name="q" placeholder="Search…" value="{{ request.GET.q|default:'' }}" class="search-input" id="search-input" autocomplete="off">
+            <div class="search-suggest" id="search-suggest" hidden></div>
+            <button type="submit" class="search-btn" aria-label="Search">&#128269;</button>
+        </form>
+    </div>
+</nav>

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify code{% endblock %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="auth-card">
+        <h1 class="page-title">Enter your code</h1>
+        <p class="auth-subtitle">We sent a 6-digit code to {{ email }}. It expires in about 10 minutes.</p>
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<span class="field-error">{{ field.errors.0 }}</span>{% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block">Verify</button>
+        </form>
+        <p class="auth-switch"><a href="{% url 'accounts:forgot_password' %}">Request a new code</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+<article class="card {% if featured %}card-featured{% endif %}">
+    {% if article.hero_image %}
+    <a href="{{ article.get_absolute_url }}" class="card-image">
+        <img src="{{ article.hero_image.url }}" alt="{{ article.title }}" loading="lazy">
+    </a>
+    {% endif %}
+    <div class="card-body">
+        <a href="{{ article.category.get_absolute_url }}" class="card-kicker">{{ article.category.name }}</a>
+        {% if article.kicker %}<p class="card-standfirst">{{ article.kicker }}</p>{% endif %}
+        <h3 class="card-title"><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
+        {% if article.excerpt %}<p class="card-excerpt">{{ article.excerpt|truncatewords:25 }}</p>{% endif %}
+        <div class="card-meta">
+            <a href="{% url 'news:author' article.author.username %}">{{ article.author.get_full_name|default:article.author.username }}</a>
+            {% if article.published_at %}
+            <time datetime="{{ article.published_at|date:'c' }}">{{ article.published_at|timesince }} ago</time>
+            {% endif %}
+        </div>
+    </div>
+</article>
